@@ -7,6 +7,7 @@
 
 #include <queue>
 #include <mutex>
+#include <shared_mutex>
 
 template<typename T>
 class SafeQueue {
@@ -18,22 +19,22 @@ public:
     ~SafeQueue() {}
 
     bool empty() {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
         return m_queue.empty();
     }
 
     auto size() {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::shared_lock<std::shared_mutex> lock(m_mutex);
         return m_queue.size();
     }
 
     void push(T &t) {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         m_queue.emplace(t);
     }
 
     bool pop(T &t) {
-        std::unique_lock<std::mutex> lock(m_mutex);
+        std::unique_lock<std::shared_mutex> lock(m_mutex);
         if (m_queue.empty()) {
             return false;
         }
@@ -45,7 +46,7 @@ public:
 
 public:
     std::queue<T> m_queue;      // 利用模板函数构造队列
-    std::mutex m_mutex;         // 访问互斥锁
+    std::shared_mutex m_mutex;         // 访问互斥锁
 };
 
 #endif //THREADPOOL_SAFEQUEUE_H
